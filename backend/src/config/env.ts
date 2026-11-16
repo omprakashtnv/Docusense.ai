@@ -123,6 +123,7 @@ const searchDefaultTopK = parsePositiveInteger(
 const nodeEnv = process.env.NODE_ENV ?? 'development';
 const uploadDirectory = process.env.UPLOAD_DIR?.trim() || 'uploads';
 const corsOrigins = parseCorsOrigins(process.env.CORS_ORIGIN, nodeEnv);
+const demoAccessKey = process.env.DEMO_ACCESS_KEY?.trim();
 
 if (chunkOverlap >= chunkSize) {
   throw new Error('CHUNK_OVERLAP must be smaller than CHUNK_SIZE.');
@@ -138,12 +139,17 @@ if (nodeEnv === 'production' && !process.env.UPLOAD_DIR?.trim()) {
   );
 }
 
+if (nodeEnv === 'production' && !demoAccessKey) {
+  throw new Error('DEMO_ACCESS_KEY is required in production.');
+}
+
 export const env = Object.freeze({
   nodeEnv,
   port: parsePort(process.env.PORT),
   corsOrigins,
   trustProxy: parseBoolean('TRUST_PROXY', process.env.TRUST_PROXY, false),
   databaseUrl: requireValue('DATABASE_URL', process.env.DATABASE_URL),
+  demoAccessKey,
   uploadDirectory,
   rateLimitWindowMs: parsePositiveInteger(
     'RATE_LIMIT_WINDOW_MS',

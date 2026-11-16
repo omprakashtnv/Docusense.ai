@@ -10,8 +10,8 @@ let isShuttingDown = false;
 async function start(): Promise<void> {
   await connectDatabase();
 
-  server = app.listen(env.port, () => {
-    console.log(`DocuSense AI API listening on http://localhost:${env.port}`);
+  server = app.listen(env.port, '0.0.0.0', () => {
+    console.log(`DocuSense AI API listening on http://0.0.0.0:${env.port}`);
   });
 }
 

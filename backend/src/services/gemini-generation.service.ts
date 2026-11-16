@@ -124,7 +124,6 @@ export class GeminiGenerationService implements GroundedAnswerGenerator {
           contents: prompt,
           config: {
             systemInstruction: SYSTEM_INSTRUCTION,
-            temperature: 0.1,
             maxOutputTokens: env.geminiGenerationMaxTokens,
             responseMimeType: 'application/json',
             responseJsonSchema: {

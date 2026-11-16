@@ -4,6 +4,7 @@ import type { AddressInfo } from 'node:net';
 import { after, before, test } from 'node:test';
 
 import { app } from '../../src/app.js';
+import { env } from '../../src/config/env.js';
 import { connectDatabase, disconnectDatabase, prisma } from '../../src/database/prisma.js';
 import { MAX_UPLOAD_SIZE_BYTES } from '../../src/middleware/document-upload.js';
 import { createSyntheticPdf } from '../helpers/synthetic-files.js';
@@ -11,6 +12,12 @@ import { createSyntheticPdf } from '../helpers/synthetic-files.js';
 let server: ReturnType<typeof app.listen>;
 let baseUrl: string;
 const createdDocumentIds = new Set<string>();
+
+function apiFetch(path: string, options?: RequestInit): Promise<Response> {
+  const headers = new Headers(options?.headers);
+  if (env.demoAccessKey) headers.set('Authorization', `Bearer ${env.demoAccessKey}`);
+  return fetch(`${baseUrl}${path}`, { ...options, headers });
+}
 
 before(async () => {
   await connectDatabase();
@@ -47,13 +54,13 @@ test('upload, detail, listing, and deletion work with a synthetic PDF', async ()
     'synthetic-api-invoice.pdf',
   );
 
-  const upload = await fetch(`${baseUrl}/documents/upload`, { method: 'POST', body: form });
+  const upload = await apiFetch('/documents/upload', { method: 'POST', body: form });
   assert.equal(upload.status, 201);
   const uploaded = (await upload.json()) as { document: { id: string; processingStatus: string } };
   createdDocumentIds.add(uploaded.document.id);
   assert.equal(uploaded.document.processingStatus, 'COMPLETED');
 
-  const detail = await fetch(`${baseUrl}/documents/${uploaded.document.id}`);
+  const detail = await apiFetch(`/documents/${uploaded.document.id}`);
   assert.equal(detail.status, 200);
   const detailBody = (await detail.json()) as {
     document: { originalName: string; cleanedText: string; storedName?: string; filePath?: string };
@@ -63,7 +70,7 @@ test('upload, detail, listing, and deletion work with a synthetic PDF', async ()
   assert.equal(detailBody.document.storedName, undefined);
   assert.equal(detailBody.document.filePath, undefined);
 
-  const list = await fetch(`${baseUrl}/documents`);
+  const list = await apiFetch('/documents');
   assert.equal(list.status, 200);
   const listed = (await list.json()) as { documents: Array<{ id: string }> };
   assert.ok(listed.documents.some(({ id }) => id === uploaded.document.id));
@@ -72,7 +79,7 @@ test('upload, detail, listing, and deletion work with a synthetic PDF', async ()
   assert.ok(stored);
   const storedPath = stored.filePath;
 
-  const deleted = await fetch(`${baseUrl}/documents/${uploaded.document.id}`, { method: 'DELETE' });
+  const deleted = await apiFetch(`/documents/${uploaded.document.id}`, { method: 'DELETE' });
   assert.equal(deleted.status, 204);
   createdDocumentIds.delete(uploaded.document.id);
   assert.equal(await prisma.document.findUnique({ where: { id: uploaded.document.id } }), null);
@@ -82,7 +89,7 @@ test('upload, detail, listing, and deletion work with a synthetic PDF', async ()
 test('upload rejects unsupported and oversized files', async () => {
   const unsupported = new FormData();
   unsupported.append('file', new Blob(['plain text'], { type: 'text/plain' }), 'unsafe.txt');
-  const unsupportedResponse = await fetch(`${baseUrl}/documents/upload`, {
+  const unsupportedResponse = await apiFetch('/documents/upload', {
     method: 'POST',
     body: unsupported,
   });
@@ -94,7 +101,7 @@ test('upload rejects unsupported and oversized files', async () => {
     new Blob([new Uint8Array(MAX_UPLOAD_SIZE_BYTES + 1)], { type: 'application/pdf' }),
     'oversized.pdf',
   );
-  const oversizedResponse = await fetch(`${baseUrl}/documents/upload`, {
+  const oversizedResponse = await apiFetch('/documents/upload', {
     method: 'POST',
     body: oversized,
   });
@@ -102,10 +109,10 @@ test('upload rejects unsupported and oversized files', async () => {
 });
 
 test('invalid identifiers and disallowed browser origins are handled safely', async () => {
-  const invalidId = await fetch(`${baseUrl}/documents/not-a-uuid`);
+  const invalidId = await apiFetch('/documents/not-a-uuid');
   assert.equal(invalidId.status, 400);
 
-  const disallowedOrigin = await fetch(`${baseUrl}/meta`, {
+  const disallowedOrigin = await apiFetch('/meta', {
     headers: { Origin: 'https://attacker.example' },
   });
   assert.equal(disallowedOrigin.status, 200);

@@ -23,7 +23,7 @@ app.use(
       callback(null, false);
     },
     methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     maxAge: 86_400,
   }),
 );
