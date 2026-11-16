@@ -1,0 +1,97 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProcessingStatus {
+  UPLOADED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum IndexingStatus {
+  NOT_INDEXED
+  INDEXING
+  INDEXED
+  FAILED
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+}
+
+model Document {
+  id               String           @id @default(uuid())
+  originalName     String
+  storedName       String           @unique
+  mimeType         String
+  fileSize         BigInt
+  filePath         String
+  extractedText    String?
+  cleanedText      String?
+  documentType     String?
+  structuredData   Json?
+  ocrUsed          Boolean          @default(false)
+  ocrPageCount     Int?
+  processingStatus ProcessingStatus @default(UPLOADED)
+  processingError  String?
+  indexingStatus   IndexingStatus   @default(NOT_INDEXED)
+  indexingError    String?
+  indexedAt        DateTime?
+  chunkCount       Int              @default(0)
+  embeddingModel   String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+  chunks           DocumentChunk[]
+
+  @@index([processingStatus])
+  @@index([indexingStatus])
+  @@index([createdAt])
+}
+
+model DocumentChunk {
+  id         String                       @id @default(uuid())
+  documentId String
+  content    String
+  chunkIndex Int
+  pageNumber Int?
+  tokenCount Int?
+  embedding  Unsupported("vector(1536)")?
+  createdAt  DateTime                     @default(now())
+  document   Document                     @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, chunkIndex])
+  @@index([documentId])
+}
+
+model ChatSession {
+  id          String        @id @default(uuid())
+  title       String
+  documentIds String[]      @default([])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now()) @updatedAt
+  messages    ChatMessage[]
+
+  @@index([createdAt])
+}
+
+model ChatMessage {
+  id                 String      @id @default(uuid())
+  sessionId          String
+  role               ChatRole
+  content            String
+  citations          Json?
+  sufficientEvidence Boolean?
+  createdAt          DateTime    @default(now())
+  session            ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}

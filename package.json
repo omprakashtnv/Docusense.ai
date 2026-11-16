@@ -1,0 +1,45 @@
+{
+  "name": "docusense-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Intelligent document processing and RAG platform monorepo",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names frontend,backend --prefix-colors cyan,magenta \"npm run dev --workspace frontend\" \"npm run dev --workspace backend\"",
+    "build": "npm run build --workspace frontend && npm run build --workspace backend",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck --workspace frontend && npm run typecheck --workspace backend",
+    "test:unit": "npm run test:unit --workspace backend && npm run test --workspace frontend",
+    "test:integration": "npm run test:integration --workspace backend && npm run db:verify && npm run indexing:verify && npm run search:verify && npm run rag:verify",
+    "test": "npm run test:unit && npm run test:integration",
+    "db:generate": "npm run prisma:generate --workspace backend",
+    "db:validate": "npm run prisma:validate --workspace backend",
+    "db:migrate": "npm run prisma:migrate:deploy --workspace backend",
+    "db:status": "npm run prisma:migrate:status --workspace backend",
+    "db:verify": "npm run db:verify --workspace backend",
+    "indexing:verify": "npm run indexing:verify --workspace backend",
+    "search:verify": "npm run search:verify --workspace backend",
+    "rag:verify": "npm run rag:verify --workspace backend",
+    "rag:evaluate": "npm run rag:evaluate --workspace backend",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run build && npm run db:validate && npm run db:status && npm test && npm run rag:evaluate"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "concurrently": "10.0.7",
+    "eslint": "10.15.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.7",
+    "globals": "17.14.0",
+    "prettier": "3.10.1",
+    "typescript-eslint": "8.72.2"
+  }
+}

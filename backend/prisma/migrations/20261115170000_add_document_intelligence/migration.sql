@@ -1,0 +1,5 @@
+ALTER TABLE "Document"
+ADD COLUMN "cleanedText" TEXT,
+ADD COLUMN "structuredData" JSONB,
+ADD COLUMN "ocrUsed" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "ocrPageCount" INTEGER;
