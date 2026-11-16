@@ -52,7 +52,7 @@ DocuSense AI processes the document, extracts relevant information, and answers 
 
 ### Document Processing Flow
 
-\`\`\`text
+```text
 Document Upload
       |
       v
@@ -75,11 +75,11 @@ Structured Data Extraction
       |
       v
 Save Document Information
-\`\`\`
+```
 
 ### Document Indexing Flow
 
-\`\`\`text
+```text
 Cleaned Document Text
       |
       v
@@ -93,11 +93,11 @@ Dimension Validation
       |
       v
 PostgreSQL + pgvector
-\`\`\`
+```
 
 ### RAG Question-Answering Flow
 
-\`\`\`text
+```text
 User Question
       |
       v
@@ -117,7 +117,7 @@ Gemini LLM
       |
       v
 Grounded Answer + Citations
-\`\`\`
+```
 
 The application only uses retrieved document content to generate grounded answers. If sufficient evidence is unavailable, it returns an insufficient-evidence response instead of inventing information.
 
@@ -155,7 +155,7 @@ The frontend provides the following sections:
 
 ## 6. Project Structure
 
-\`\`\`text
+```text
 docusense-ai/
 │
 ├── frontend/
@@ -190,7 +190,7 @@ docusense-ai/
 ├── docker-compose.yml
 ├── README.md
 └── .gitignore
-\`\`\`
+```
 
 ## 7. Prerequisites
 
@@ -203,53 +203,51 @@ Install the following before starting:
 
 Check installed versions:
 
-\`\`\`bash
+```bash
 node -v
 npm -v
-\`\`\`
+```
 
 ## 8. Local Setup and Installation
 
 ### Step 1: Clone the Repository
 
-\`\`\`bash
-git clone YOUR_GITHUB_REPOSITORY_URL
+```bash
+git clone https://github.com/omprakashtnv/Docusense.ai
 cd docusense-ai
-\`\`\`
-
-Replace `YOUR_GITHUB_REPOSITORY_URL` with your actual GitHub repository URL.
+```
 
 ### Step 2: Install Dependencies
 
 Run this command from the root project directory:
 
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+```
 
 ### Step 3: Configure Backend Environment
 
 Create the backend environment file:
 
-\`\`\`bash
-cp backend/.env.example backend/.env
-\`\`\`
+```bash
+cp backend/.env
+```
 
 Open `backend/.env` and configure the required variables.
 
 Required configuration:
 
-\`\`\`env
+```env
 DATABASE_URL="postgresql://USERNAME:PASSWORD@localhost:5432/docusense_ai"
 GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
 
 GEMINI_EMBEDDING_MODEL="gemini-embedding-001"
 GEMINI_EMBEDDING_DIMENSIONS="1536"
-\`\`\`
+```
 
 Additional optional configuration:
 
-\`\`\`env
+```env
 GEMINI_GENERATION_MODEL="gemini-3.8-flash"
 
 CHUNK_SIZE="1000"
@@ -265,39 +263,36 @@ RAG_HISTORY_MESSAGE_LIMIT="8"
 
 OCR_LANGUAGE="eng"
 OCR_MAX_PAGES="25"
-\`\`\`
+```
 
-Use the complete `backend/.env.example` as the source of truth for all supported configuration options and their defaults.
+Use the complete `backend/.env` as the source of truth for all supported configuration options and their defaults.
 
 **Important:**
 
 - Replace the database username and password with your PostgreSQL credentials.
 - Add your own Gemini API key.
-- Keep the Gemini API key only in the backend environment.
-- Never commit `.env` files to GitHub.
-- Do not use a `VITE_` prefix for backend secrets.
 
 ### Step 4: Configure Frontend Environment
 
 Create the frontend environment file:
 
-\`\`\`bash
-cp frontend/.env.example frontend/.env
-\`\`\`
+```bash
+cp frontend/.env
+```
 
-Open `frontend/.env` and configure the frontend API URL using the exact variable name provided in `frontend/.env.example`.
+Open `frontend/.env` and configure the frontend API URL using the exact variable name provided in `frontend/.env`.
 
 For local development, the API runs at:
 
-\`\`\`text
+```text
 http://localhost:4000
-\`\`\`
+```
 
 The frontend runs at:
 
-\`\`\`text
+```text
 http://localhost:5173
-\`\`\`
+```
 
 Only public browser configuration should be stored in the frontend environment. Never add database credentials or Gemini API keys to frontend variables.
 
@@ -305,9 +300,9 @@ Only public browser configuration should be stored in the frontend environment. 
 
 Open PostgreSQL and execute:
 
-\`\`\`sql
+```sql
 CREATE DATABASE docusense_ai;
-\`\`\`
+```
 
 Make sure pgvector is installed and available to the database server.
 
@@ -317,11 +312,11 @@ The database role must have permission to create the vector extension, or an adm
 
 From the root project directory:
 
-\`\`\`bash
+```bash
 npm run db:migrate
 npm run db:generate
 npm run db:verify
-\`\`\`
+```
 
 These commands apply the migrations, generate Prisma Client, and verify database connectivity and vector configuration.
 
@@ -329,9 +324,9 @@ These commands apply the migrations, generate Prisma Client, and verify database
 
 Run both frontend and backend together:
 
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
 Open the application:
 
@@ -345,17 +340,17 @@ Open the application:
 
 To run applications separately:
 
-Backend:
+**Backend:**
 
-\`\`\`bash
+```bash
 npm run dev --workspace backend
-\`\`\`
+```
 
-Frontend:
+**Frontend:**
 
-\`\`\`bash
+```bash
 npm run dev --workspace frontend
-\`\`\`
+```
 
 ## 9. How to Use the Application
 
@@ -415,7 +410,7 @@ The maximum upload size is 10 MB.
 
 Run the following commands from the project root:
 
-\`\`\`bash
+```bash
 npm run typecheck
 npm run lint
 npm run format:check
@@ -432,44 +427,13 @@ npm run rag:verify
 npm run test
 npm run rag:evaluate
 npm run verify
-\`\`\`
+```
 
 Automated tests use deterministic Gemini mocks and synthetic records, avoiding paid API calls during those tests.
 
 For live AI testing, configure your Gemini API key and use synthetic documents.
 
-## 12. Security and Important Notes
-
-- Uploaded files are validated by extension, MIME type, and binary signature.
-- Files are stored using UUID-based names.
-- Database queries for vector search use parameterized SQL.
-- API keys are stored only on the backend.
-- Request validation and rate limiting are enabled.
-- Document content is treated as untrusted input for AI generation.
-- Uploaded files should be stored on persistent storage in production.
-
-**Current limitation:** Authentication, authorization, user ownership, and tenant isolation are not implemented. Anyone who can access the API can access all documents and chat sessions. Do not expose this development version as a public multi-user application.
-
-## 13. Known Limitations
-
-- No user authentication or multi-tenant isolation.
-- OCR and document processing currently run synchronously.
-- Local file storage requires persistent storage.
-- Large workloads would benefit from background job processing.
-- Live Gemini usage may incur API charges depending on account quota and pricing.
-- Document classification and structured extraction are currently deterministic.
-
-## 14. Additional Documentation
-
-More detailed technical documentation is available in the `docs/` directory:
-
-- `docs/AUDIT.md` – Final project audit.
-- `docs/SECURITY.md` – Security review and access model.
-- `docs/RAG_EVALUATION.md` – RAG evaluation results.
-- `docs/DEPLOYMENT.md` – Deployment preparation.
-- `docs/PORTFOLIO.md` – Project summary and interview preparation.
-
-## 15. Future Improvements
+## 12. Future Improvements
 
 Potential future enhancements:
 
@@ -484,4 +448,4 @@ Potential future enhancements:
 
 ## License
 
-This project is developed as a portfolio and learning project.
+This project is developed as a learning project.
