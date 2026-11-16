@@ -445,3 +445,10 @@ Potential future enhancements:
 - Duplicate document detection.
 - AI answer feedback and evaluation.
 - Structured data export to CSV and Excel.
+
+## Licence
+Copyright © 2026 Om Prakash Gupta.
+
+All rights reserved.
+
+This repository is provided for evaluation and demonstration purposes only. No part of this project may be copied, modified, distributed, or used without prior written permission from the author.
