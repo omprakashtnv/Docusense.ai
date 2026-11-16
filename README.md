@@ -445,7 +445,3 @@ Potential future enhancements:
 - Duplicate document detection.
 - AI answer feedback and evaluation.
 - Structured data export to CSV and Excel.
-
-## License
-
-This project is developed as a learning project.
